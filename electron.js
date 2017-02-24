@@ -1,44 +1,70 @@
 #!/usr/bin/env electron
 
-const path = require('path')
-const url = require('url')
-const commander = require('commander')
-const electron = require('electron')
-const EasyTable = require('easy-table')
+const { join } = require('path')
+const { format } = require('url')
+const { Command } = require('commander')
+const { app, BrowserWindow, ipcMain } = require('electron')
+const Table = require('cli-table')
 
-const urls = commander.parse(process.argv).args
+const packageInfo = require('./package.json')
 
-if (urls.length === 0) throw Error('Give one test URL at least.')
+const commander = new Command(packageInfo.name)
+  .version(packageInfo.version)
+  .description(packageInfo.description)
+  .option('-k, --keep', 'keep pages open.')
+  .arguments('<urls...>')
+  .parse(process.argv)
 
-const page = url.format({
+const urls = commander.args
+
+if (urls.length === 0) commander.help()
+
+const page = format({
   protocol: 'file:',
-  pathname: path.join(__dirname, 'index.html'),
+  pathname: join(__dirname, 'index.html'),
   slashes: true
 })
 
 const bootstrap = () => {
-  const window = new electron.BrowserWindow({
+  const window = new BrowserWindow({
     webPreferences: {
       offscreen: true
     }
   })
-  window.webContents.once('did-finish-load', () => {
-    window.webContents.send('urls', urls)
-  })
+  window.webContents.once('did-finish-load',
+    () => window.webContents.send('urls', urls))
   window.loadURL(page)
 }
 
-electron.ipcMain.once('results', (event, results) => {
-  const table = new EasyTable()
-  for (const url in results) {
-    table.cell('URL', url)
-    table.cell('Ready', results[url].ready, EasyTable.number())
-    table.cell('Load', results[url].load, EasyTable.number())
-    table.newRow()
+ipcMain.once('results', (event, results) => {
+  const table = new Table({
+    head: ['',
+      'DomainLookup',
+      'Connect',
+      'DOMLoading',
+      'Response',
+      'DOMInteractive',
+      'DOMContentLoaded',
+      'DOMComplete',
+      'Load'
+    ]
+  })
+  for (const result of results) {
+    table.push({
+      [result.url]: [
+        String(result.domainLookup),
+        String(result.connect),
+        String(result.domLoading),
+        String(result.response),
+        String(result.domInteractive),
+        String(result.domContentLoadedEvent),
+        String(result.domComplete),
+        String(result.loadEvent)
+      ]
+    })
   }
-  table.sort(['Load, Ready'])
   console.log(table.toString())
-  electron.app.exit()
+  if (!commander.keep) app.exit()
 })
 
-electron.app.once('ready', bootstrap)
+app.once('ready', bootstrap)
