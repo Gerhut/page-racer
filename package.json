@@ -1,6 +1,6 @@
 {
   "name": "page-racer",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Page speed tester.",
   "main": "index.js",
   "scripts": {
