@@ -1,0 +1,33 @@
+{
+  "name": "page-racer",
+  "version": "0.0.0",
+  "description": "Page speed tester.",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron electron.js",
+    "test": "standard"
+  },
+  "preferGlobal": true,
+  "bin": "bin.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gerhut/page-racer.git"
+  },
+  "author": "George Chung <Gerhut@GMail.com>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Gerhut/page-racer/issues"
+  },
+  "homepage": "https://github.com/Gerhut/page-racer#readme",
+  "dependencies": {
+    "args": "^2.3.0",
+    "commander": "^2.9.0",
+    "easy-table": "^1.0.0",
+    "electron": "^1.4.15",
+    "minimist": "^1.2.0",
+    "normalize.css": "^5.0.0"
+  },
+  "devDependencies": {
+    "standard": "^8.6.0"
+  }
+}
